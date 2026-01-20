@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { ApiService } from '../../services/api.service';
 
 export async function GET(request: NextRequest) {
   const searchParams = request.nextUrl.searchParams;
@@ -12,23 +13,10 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    const apiUrl = `https://me-conectei-svc-temp-4f6577936f24.herokuapp.com/company/proxy?query=${encodeURIComponent(query)}`;
-    
-    const response = await fetch(apiUrl, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json'
-      }
-    });
-
-    if (!response.ok) {
-      throw new Error(`API responded with status ${response.status}`);
-    }
-
-    const data = await response.json();
+    const data = await ApiService.searchAddresses(query);
     
     if (data.success && data.data && data.data.results) {
-      const predictions = data.data.results.map((result: any) => ({
+      const predictions = data.data.results.map((result) => ({
         description: result.formatted_address || result.name,
         place_id: result.place_id,
         structured_formatting: {

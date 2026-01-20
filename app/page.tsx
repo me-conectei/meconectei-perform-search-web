@@ -1,7 +1,8 @@
 "use client";
 
 import Image from "next/image";
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
+import { useRouter } from "next/navigation";
 
 interface SearchResult {
   description: string;
@@ -13,9 +14,11 @@ interface SearchResult {
 }
 
 export default function Home() {
+  const router = useRouter();
   const [address, setAddress] = useState("");
   const [isLocating, setIsLocating] = useState(false);
   const [isSearching, setIsSearching] = useState(false);
+  const [isLoadingPlans, setIsLoadingPlans] = useState(false);
   const [error, setError] = useState("");
   const [results, setResults] = useState<SearchResult[]>([]);
   const [showResults, setShowResults] = useState(false);
@@ -140,24 +143,29 @@ export default function Home() {
   };
 
   useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      const target = event.target as HTMLElement;
-      if (!target.closest('.search-container')) {
-        setShowResults(false);
+    return () => {
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
       }
     };
+  }, []);
 
+  const handleClickOutside = useCallback((event: MouseEvent) => {
+    const target = event.target as HTMLElement;
+    if (!target.closest('.search-container')) {
+      setShowResults(false);
+    }
+  }, []);
+
+  useEffect(() => {
     if (showResults) {
       document.addEventListener('mousedown', handleClickOutside);
     }
 
     return () => {
-      if (timeoutRef.current) {
-        clearTimeout(timeoutRef.current);
-      }
       document.removeEventListener('mousedown', handleClickOutside);
     };
-  }, [showResults]);
+  }, [showResults, handleClickOutside]);
 
   const handleSelectResult = (result: SearchResult) => {
     setAddress(result.description);
@@ -166,6 +174,39 @@ export default function Home() {
     
     if (timeoutRef.current) {
       clearTimeout(timeoutRef.current);
+    }
+  };
+
+  const handleSearch = async () => {
+    if (!address.trim()) {
+      setError("Por favor, digite um endereço para buscar");
+      return;
+    }
+
+    setIsLoadingPlans(true);
+    setError("");
+    setShowResults(false);
+
+    try {
+      const response = await fetch(`/api/search-plans?address=${encodeURIComponent(address)}`);
+      const data = await response.json();
+
+      if (data.success && data.redirectUrl) {
+        router.push(data.redirectUrl);
+      } else {
+        setError(data.errorMessage || "Não foi possível obter a localização do endereço");
+        setIsLoadingPlans(false);
+      }
+    } catch (err) {
+      console.error('Erro ao buscar planos:', err);
+      setError("Erro ao buscar planos. Tente novamente.");
+      setIsLoadingPlans(false);
+    }
+  };
+
+  const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter") {
+      handleSearch();
     }
   };
 
@@ -202,6 +243,7 @@ export default function Home() {
                   type="text"
                   value={address}
                   onChange={(e) => handleInputChange(e.target.value)}
+                  onKeyPress={handleKeyPress}
                   onFocus={() => {
                     if (results.length > 0) {
                       setShowResults(true);
@@ -245,9 +287,11 @@ export default function Home() {
               </div>
               <button
                 type="button"
-                className="w-full rounded-lg bg-[#6B46C1] px-8 py-4 text-base font-semibold text-white transition-colors hover:bg-[#553C9A] focus:outline-none focus:ring-2 focus:ring-[#6B46C1] focus:ring-offset-2 sm:w-auto sm:px-12 sm:py-5 sm:text-lg"
+                onClick={handleSearch}
+                disabled={isLoadingPlans}
+                className="w-full rounded-lg bg-[#6B46C1] px-8 py-4 text-base font-semibold text-white transition-colors hover:bg-[#553C9A] focus:outline-none focus:ring-2 focus:ring-[#6B46C1] focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed sm:w-auto sm:px-12 sm:py-5 sm:text-lg"
               >
-                Buscar
+                {isLoadingPlans ? "Buscando..." : "Buscar"}
               </button>
             </div>
             
