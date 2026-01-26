@@ -39,6 +39,13 @@ interface PlansResult {
   }>;
 }
 
+interface ImpulseResult {
+  success: boolean;
+  error: number;
+  errorMessage: string;
+  data: boolean;
+}
+
 export class ApiService {
   private static async fetchFromApi<T>(endpoint: string): Promise<T> {
     const response = await fetch(`${API_BASE_URL}${endpoint}`, {
@@ -106,5 +113,22 @@ export class ApiService {
       }
     }
     return null;
+  }
+
+  static async checkPlanImpulse(idPlan: number): Promise<ImpulseResult> {
+    try {
+      const data = await this.fetchFromApi<ImpulseResult>(
+        `/client/plan/impulse/${idPlan}`
+      );
+      return data;
+    } catch (error) {
+      console.error('Erro ao verificar plano impulsionado:', error);
+      return {
+        success: false,
+        error: 1,
+        errorMessage: 'Erro ao verificar plano impulsionado',
+        data: false
+      };
+    }
   }
 }
