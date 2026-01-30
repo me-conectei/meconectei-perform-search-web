@@ -277,7 +277,14 @@ export default function PlansContent() {
                       Instalação: R$ {formatPrice(plan.priceInstallation)}
                     </p>
                   )}
-                  <button className="w-full rounded-lg bg-[#6B46C1] px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-[#553C9A]">
+                  <button
+                    onClick={() =>
+                      router.push(
+                        `/plans/solicitar?idPlan=${plan.idPlan}&planName=${encodeURIComponent(plan.planName)}`
+                      )
+                    }
+                    className="w-full rounded-lg bg-[#6B46C1] px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-[#553C9A]"
+                  >
                     Contratar
                   </button>
                 </div>
