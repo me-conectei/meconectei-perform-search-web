@@ -131,4 +131,43 @@ export class ApiService {
       };
     }
   }
+
+  static async postPessoasInteressadas(payload: {
+    idPlan: number;
+    email?: string;
+    phone: string;
+  }): Promise<{ success: boolean; error?: number; errorMessage?: string }> {
+    try {
+      const response = await fetch(`${API_BASE_URL}/client/pessoas-interessadas`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          idPlan: payload.idPlan,
+          ...(payload.email && { email: payload.email }),
+          phone: payload.phone,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        return {
+          success: false,
+          error: data.error,
+          errorMessage: data.errorMessage || 'Erro ao enviar solicitação',
+        };
+      }
+
+      return { success: true };
+    } catch (error) {
+      console.error('Erro ao registrar pessoa interessada:', error);
+      return {
+        success: false,
+        error: 1,
+        errorMessage: 'Erro ao enviar solicitação. Tente novamente.',
+      };
+    }
+  }
 }
