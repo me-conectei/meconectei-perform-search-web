@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Script from "next/script";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
+import WhatsAppFloat from "./components/WhatsAppFloat";
 
 const GTM_ID = "GTM-KX557W6V";
 
@@ -51,6 +52,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
           />
         </noscript>
         {children}
+        <WhatsAppFloat />
       </body>
     </html>
   );
