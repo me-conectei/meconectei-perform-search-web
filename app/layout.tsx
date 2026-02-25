@@ -3,6 +3,7 @@ import Script from "next/script";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import WhatsAppFloat from "./components/WhatsAppFloat";
+import PromoBanner from "./components/PromoBanner";
 
 const GTM_ID = "GTM-KX557W6V";
 
@@ -51,6 +52,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
             title="Google Tag Manager"
           />
         </noscript>
+        <PromoBanner />
         {children}
         <WhatsAppFloat />
       </body>
