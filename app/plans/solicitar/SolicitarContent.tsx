@@ -10,6 +10,7 @@ export default function SolicitarContent() {
   const idPlan = searchParams.get("idPlan");
   const planName = searchParams.get("planName") ?? "";
 
+  const [nome, setNome] = useState("");
   const [phone, setPhone] = useState("");
   const [email, setEmail] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -37,6 +38,12 @@ export default function SolicitarContent() {
       return;
     }
 
+    const nomeTrim = nome.trim();
+    if (!nomeTrim) {
+      setError("Informe seu nome.");
+      return;
+    }
+
     const phoneDigits = phone.replace(/\D/g, "");
     if (phoneDigits.length < 10) {
       setError("Informe um telefone válido.");
@@ -51,6 +58,7 @@ export default function SolicitarContent() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           idPlan: planId,
+          nome: nomeTrim,
           phone: phoneDigits,
           ...(email.trim() && { email: email.trim() }),
         }),
@@ -167,6 +175,20 @@ export default function SolicitarContent() {
               onSubmit={handleSubmit}
               className="rounded-lg border-2 border-gray-200 bg-white p-6 shadow-md"
             >
+              <div className="mb-4">
+                <label htmlFor="nome" className="mb-2 block text-sm font-medium text-gray-700">
+                  Nome *
+                </label>
+                <input
+                  id="nome"
+                  type="text"
+                  value={nome}
+                  onChange={(e) => setNome(e.target.value)}
+                  placeholder="Seu nome"
+                  className="w-full rounded-lg border border-gray-300 px-4 py-3 focus:border-[#6B46C1] focus:outline-none focus:ring-2 focus:ring-[#6B46C1]/20"
+                  required
+                />
+              </div>
               <div className="mb-4">
                 <label htmlFor="phone" className="mb-2 block text-sm font-medium text-gray-700">
                   Telefone *

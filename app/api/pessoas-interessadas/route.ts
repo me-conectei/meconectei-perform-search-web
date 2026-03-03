@@ -4,7 +4,7 @@ import { ApiService } from '../../services/api.service';
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { idPlan, email, phone } = body;
+    const { idPlan, nome, email, phone } = body;
 
     if (idPlan == null || idPlan === '') {
       return NextResponse.json(
@@ -30,6 +30,7 @@ export async function POST(request: NextRequest) {
 
     const result = await ApiService.postPessoasInteressadas({
       idPlan: planId,
+      ...(nome && typeof nome === 'string' && nome.trim() !== '' && { nome: nome.trim() }),
       ...(email && email.trim() !== '' && { email: email.trim() }),
       phone: phone.trim().replace(/\D/g, ''),
     });

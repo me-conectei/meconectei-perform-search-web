@@ -134,6 +134,7 @@ export class ApiService {
 
   static async postPessoasInteressadas(payload: {
     idPlan: number;
+    nome?: string;
     email?: string;
     phone: string;
   }): Promise<{ success: boolean; error?: number; errorMessage?: string }> {
@@ -145,6 +146,7 @@ export class ApiService {
         },
         body: JSON.stringify({
           idPlan: payload.idPlan,
+          ...(payload.nome && { nome: payload.nome }),
           ...(payload.email && { email: payload.email }),
           phone: payload.phone,
         }),
