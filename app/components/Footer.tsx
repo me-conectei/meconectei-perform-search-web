@@ -1,4 +1,5 @@
 import Image from "next/image";
+import Link from "next/link";
 
 const APP_STORE_URL = "https://apps.apple.com/br/app/meconectei-planos-de-internet/id6751843760";
 const GOOGLE_PLAY_URL = "https://play.google.com/store/apps/details?id=com.meconectei.mob";
@@ -7,6 +8,14 @@ export default function Footer() {
   return (
     <footer className="w-full border-t border-gray-200 bg-white px-4 py-8 sm:px-6 sm:py-12">
       <div className="mx-auto max-w-7xl">
+        <div className="mb-6 flex justify-center">
+          <Link
+            href="/solicitar-servico"
+            className="text-sm font-medium text-[#6B46C1] hover:text-[#553C9A] hover:underline"
+          >
+            Câmera ou novo ponto Wi-Fi
+          </Link>
+        </div>
         <div className="flex flex-col items-center gap-6 sm:flex-row sm:justify-center sm:gap-8">
           <div className="text-center sm:text-left">
             <p className="mb-4 text-sm font-medium text-gray-700 sm:text-base">

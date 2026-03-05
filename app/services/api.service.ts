@@ -132,6 +132,70 @@ export class ApiService {
     }
   }
 
+  static async postSolicitacaoNovoServico(payload: {
+    nome: string;
+    telefone: string;
+    servico: 'CAMERAS' | 'NOVO PONTO DE WIFI';
+    quantidade_cameras?: number;
+    camera_interna?: boolean;
+    camera_externa?: boolean;
+    tempo_gravacao_dias?: number;
+    provedor_internet?: string;
+  }): Promise<{
+    success: boolean;
+    error?: number;
+    errorMessage?: string;
+    id?: number;
+    uid?: string;
+    camps?: Record<string, string>;
+  }> {
+    try {
+      const body: Record<string, unknown> = {
+        nome: payload.nome.trim().slice(0, 256),
+        telefone: payload.telefone.trim().replace(/\D/g, '').slice(0, 45),
+        servico: payload.servico,
+      };
+      if (payload.servico === 'CAMERAS') {
+        if (payload.quantidade_cameras != null) body.quantidade_cameras = payload.quantidade_cameras;
+        if (payload.camera_interna != null) body.camera_interna = payload.camera_interna;
+        if (payload.camera_externa != null) body.camera_externa = payload.camera_externa;
+        if (payload.tempo_gravacao_dias != null) body.tempo_gravacao_dias = payload.tempo_gravacao_dias;
+      }
+      if (payload.provedor_internet?.trim())
+        body.provedor_internet = payload.provedor_internet.trim().slice(0, 256);
+
+      const response = await fetch(`${API_BASE_URL}/client/solicitacoes-novo-servico`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        return {
+          success: false,
+          error: data.error,
+          errorMessage: data.errorMessage || 'Erro ao enviar solicitação',
+          camps: data.camps,
+        };
+      }
+
+      return {
+        success: true,
+        id: data.id,
+        uid: data.uid,
+      };
+    } catch (error) {
+      console.error('Erro ao criar solicitação de serviço:', error);
+      return {
+        success: false,
+        error: 1,
+        errorMessage: 'Erro ao enviar solicitação. Tente novamente.',
+      };
+    }
+  }
+
   static async postPessoasInteressadas(payload: {
     idPlan: number;
     nome?: string;
