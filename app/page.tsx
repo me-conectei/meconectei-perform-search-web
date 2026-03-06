@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import Link from "next/link";
 import { useState, useRef, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import Footer from "./components/Footer";
@@ -331,6 +332,40 @@ export default function Home() {
           <p className="mt-6 text-center text-sm text-gray-600 sm:text-base">
             Encontre, compare e contrate os melhores planos de internet
           </p>
+
+          <div className="mt-10 sm:mt-14">
+            <p className="mb-4 text-center text-base font-semibold text-gray-700 sm:text-lg">
+              Ou precisa de outro serviço?
+            </p>
+            <div className="grid gap-4 sm:grid-cols-2 sm:gap-6">
+              <Link
+                href="/solicitar-servico?tipo=CAMERAS"
+                className="group flex flex-col items-center rounded-xl border-2 border-gray-200 bg-white p-6 text-center shadow-sm transition-all hover:border-[#6B46C1] hover:shadow-md focus:border-[#6B46C1] focus:outline-none focus:ring-2 focus:ring-[#6B46C1]/20 sm:p-8"
+              >
+                <span className="mb-3 flex h-14 w-14 items-center justify-center rounded-full bg-purple-100 text-[#6B46C1] transition-colors group-hover:bg-[#6B46C1] group-hover:text-white sm:h-16 sm:w-16">
+                  <svg className="h-7 w-7 sm:h-8 sm:w-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                  </svg>
+                </span>
+                <span className="text-lg font-semibold text-gray-900 sm:text-xl">Procurando Câmera</span>
+                <span className="mt-1 text-sm text-gray-500">Câmeras de segurança e gravação</span>
+                <span className="mt-3 text-sm font-medium text-[#6B46C1] group-hover:underline">Solicitar →</span>
+              </Link>
+              <Link
+                href="/solicitar-servico?tipo=WIFI"
+                className="group flex flex-col items-center rounded-xl border-2 border-gray-200 bg-white p-6 text-center shadow-sm transition-all hover:border-[#6B46C1] hover:shadow-md focus:border-[#6B46C1] focus:outline-none focus:ring-2 focus:ring-[#6B46C1]/20 sm:p-8"
+              >
+                <span className="mb-3 flex h-14 w-14 items-center justify-center rounded-full bg-purple-100 text-[#6B46C1] transition-colors group-hover:bg-[#6B46C1] group-hover:text-white sm:h-16 sm:w-16">
+                  <svg className="h-7 w-7 sm:h-8 sm:w-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.111 16.404a5.5 5.5 0 017.778 0M12 20h.01m-7.08-7.071c3.904-3.905 10.236-3.905 14.141 0M1.394 9.393c5.857-5.857 15.355-5.857 21.213 0" />
+                  </svg>
+                </span>
+                <span className="text-lg font-semibold text-gray-900 sm:text-xl">Mais um ponto de Wi-Fi</span>
+                <span className="mt-1 text-sm text-gray-500">Novo ponto de acesso na sua casa</span>
+                <span className="mt-3 text-sm font-medium text-[#6B46C1] group-hover:underline">Solicitar →</span>
+              </Link>
+            </div>
+          </div>
         </div>
       </main>
 
