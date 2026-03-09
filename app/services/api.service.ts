@@ -1,4 +1,5 @@
 const API_BASE_URL = 'https://me-conectei-svc-temp-4f6577936f24.herokuapp.com';
+//const API_BASE_URL = 'http://localhost:8080';
 
 interface GeocodeResult {
   success: boolean;
@@ -44,6 +45,32 @@ interface ImpulseResult {
   error: number;
   errorMessage: string;
   data: boolean;
+}
+
+export interface GoogleReview {
+  author_name: string;
+  rating: number;
+  text: string;
+  relative_time_description: string;
+  time: number;
+}
+
+export interface GoogleAvaliacaoData {
+  placeId: string | null;
+  placeName: string | null;
+  formattedAddress: string | null;
+  rating: number | null;
+  userRatingsTotal: number | null;
+  status: string;
+  lastFetchedAt: string | null;
+  reviews: GoogleReview[];
+}
+
+export interface GoogleAvaliacaoResult {
+  success: boolean;
+  error: number;
+  errorMessage: string;
+  data: GoogleAvaliacaoData | null;
 }
 
 export class ApiService {
@@ -128,6 +155,23 @@ export class ApiService {
         error: 1,
         errorMessage: 'Erro ao verificar plano impulsionado',
         data: false
+      };
+    }
+  }
+
+  static async getGoogleAvaliacao(idCompany: number): Promise<GoogleAvaliacaoResult> {
+    try {
+      const data = await this.fetchFromApi<GoogleAvaliacaoResult>(
+        `/client/company/${idCompany}/google-avaliacao`
+      );
+      return data;
+    } catch (error) {
+      console.error('Erro ao buscar avaliação Google:', error);
+      return {
+        success: false,
+        error: 1,
+        errorMessage: 'Erro ao buscar avaliação Google',
+        data: null
       };
     }
   }
