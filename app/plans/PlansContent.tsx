@@ -1,9 +1,10 @@
 "use client";
 
 import Image from "next/image";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import Footer from "../components/Footer";
+import type { GoogleAvaliacaoData } from "../services/api.service";
 
 interface Plan {
   idPlan: number;
@@ -22,6 +23,32 @@ interface Plan {
   isImpulsed?: boolean;
 }
 
+function StarRating({ rating }: { rating: number }) {
+  const full = Math.floor(rating);
+  const hasHalf = rating % 1 >= 0.5;
+  const empty = 5 - full - (hasHalf ? 1 : 0);
+  const sizeClass = "w-3.5 h-3.5";
+  return (
+    <span className="inline-flex items-center gap-px" aria-label={`${rating} de 5 estrelas`}>
+      {Array.from({ length: full }, (_, i) => (
+        <svg key={`f-${i}`} className={`${sizeClass} text-amber-400`} fill="currentColor" viewBox="0 0 20 20">
+          <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+        </svg>
+      ))}
+      {hasHalf && (
+        <svg className={`${sizeClass} text-amber-400`} fill="currentColor" viewBox="0 0 20 20">
+          <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+        </svg>
+      )}
+      {Array.from({ length: empty }, (_, i) => (
+        <svg key={`e-${i}`} className={`${sizeClass} text-gray-200`} fill="currentColor" viewBox="0 0 20 20">
+          <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+        </svg>
+      ))}
+    </span>
+  );
+}
+
 export default function PlansContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
@@ -29,9 +56,28 @@ export default function PlansContent() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState("");
   const [address, setAddress] = useState("");
+  const [googleByCompany, setGoogleByCompany] = useState<Record<number, GoogleAvaliacaoData | null>>({});
+  const [expandedReviews, setExpandedReviews] = useState<Set<number>>(new Set());
   const checkingImpulseRef = useRef<Set<number>>(new Set());
   const isCheckingAllRef = useRef<boolean>(false);
   const currentSearchIdRef = useRef<number>(0);
+
+  const fetchGoogleAvaliacoes = useCallback(async (planList: Plan[]) => {
+    const companyIds = [...new Set(planList.map((p) => p.idCompany))];
+    const results: Record<number, GoogleAvaliacaoData | null> = {};
+    await Promise.all(
+      companyIds.map(async (idCompany) => {
+        try {
+          const res = await fetch(`/api/company/${idCompany}/google-avaliacao`);
+          const json = await res.json();
+          results[idCompany] = json.success && json.data ? json.data : null;
+        } catch {
+          results[idCompany] = null;
+        }
+      })
+    );
+    setGoogleByCompany((prev) => ({ ...prev, ...results }));
+  }, []);
 
   useEffect(() => {
     const lat = searchParams.get("lat");
@@ -69,7 +115,7 @@ export default function PlansContent() {
         const initialPlans = data.plans.map((plan: Plan) => ({ ...plan, isImpulsed: false }));
         setPlans(initialPlans);
         setIsLoading(false);
-
+        fetchGoogleAvaliacoes(initialPlans);
         checkPlansImpulseAsync(initialPlans, searchId);
       } else {
         setPlans([]);
@@ -243,6 +289,56 @@ export default function PlansContent() {
                   <div className="mb-4">
                     <h3 className="text-xl font-bold text-gray-900">{plan.planName}</h3>
                     <p className="mt-1 text-sm text-gray-600">{plan.companyName}</p>
+                    {(() => {
+                      const avaliacao = googleByCompany[plan.idCompany];
+                      if (avaliacao?.rating == null) return null;
+                      const { rating, userRatingsTotal, reviews } = avaliacao;
+                      return (
+                        <div className="mt-2 flex flex-wrap items-center gap-2">
+                          <StarRating rating={rating} />
+                          <span className="text-sm text-gray-500">
+                            {rating.toFixed(1).replace(".", ",")}
+                            {userRatingsTotal != null &&
+                              ` · ${userRatingsTotal} avaliaç${userRatingsTotal === 1 ? "ão" : "ões"}`}
+                          </span>
+                          {reviews?.length ? (
+                            <button
+                              type="button"
+                              onClick={() =>
+                                setExpandedReviews((s) => {
+                                  const next = new Set(s);
+                                  if (next.has(plan.idPlan)) next.delete(plan.idPlan);
+                                  else next.add(plan.idPlan);
+                                  return next;
+                                })
+                              }
+                              className="text-xs font-medium text-[#6B46C1] hover:underline"
+                            >
+                              {expandedReviews.has(plan.idPlan) ? "Ocultar comentários" : "Ver comentários"}
+                            </button>
+                          ) : null}
+                        </div>
+                      );
+                    })()}
+                    {expandedReviews.has(plan.idPlan) &&
+                      (() => {
+                        const revs = googleByCompany[plan.idCompany]?.reviews;
+                        if (!revs?.length) return null;
+                        return (
+                          <ul className="mt-2 space-y-2 rounded border border-gray-100 bg-gray-50/80 p-2 text-left">
+                            {revs.map((r, i) => (
+                            <li key={i} className="border-b border-gray-100 pb-2 last:border-0 last:pb-0">
+                              <div className="flex items-center gap-2">
+                                <StarRating rating={r.rating} />
+                                <span className="text-xs text-gray-500">{r.relative_time_description}</span>
+                              </div>
+                              <p className="mt-0.5 text-xs font-medium text-gray-700">{r.author_name}</p>
+                              <p className="mt-0.5 line-clamp-3 text-xs text-gray-600">{r.text}</p>
+                            </li>
+                            ))}
+                          </ul>
+                        );
+                      })()}
                   </div>
                   <div className="mb-4">
                     <p className="text-2xl font-bold text-[#6B46C1]">
