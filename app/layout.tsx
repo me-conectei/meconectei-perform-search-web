@@ -18,8 +18,9 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "meconectei - Encontre os melhores planos de internet",
-  description: "Encontre, compare e contrate os melhores planos de internet para o seu endereço",
+  title: "meconectei - Internet, câmeras e Wi-Fi",
+  description:
+    "Compare planos de internet no seu endereço, solicite câmeras de segurança ou um novo ponto de Wi-Fi em um só lugar.",
 };
 
 export default function RootLayout({
